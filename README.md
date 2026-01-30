@@ -24,7 +24,7 @@ This project demonstrates a "Clean Architecture" approach to web development, fo
 
 * **API Pattern:** Minimal APIs (high-performance routing)
 
-* **Error Handling:** RFC 7231 Problem Details via IExceptionHandler
+* **Error Handling:** RFC 7231 Problem Details via `IExceptionHandler`
 
 ---
 
