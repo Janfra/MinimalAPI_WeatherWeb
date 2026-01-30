@@ -1,0 +1,111 @@
+@WeatherWeb_HostAddress = https://localhost:7176
+@id = 1
+@location = England
+@temperature_c = 20
+@humidity = 20
+@minHumidity = 90.0
+
+##################################################################
+# SETUP PHASE (Run this first on an empty DB)
+##################################################################
+
+### [SUCCESS] 1. Create a New Report (Populate DB)
+# Note: The ID is omitted here; the DB handles auto-generation.
+POST {{WeatherWeb_HostAddress}}/weather/reports
+Content-Type: application/json
+
+{
+  "temp_c": 35,
+  "humidity_percent": 95,
+  "location": "England"
+}
+###
+
+##################################################################
+# TESTING PHASE (Uses set variables from above)
+##################################################################
+# Note: Ensure @id matches an existing database entry for valid statuses
+
+POST {{WeatherWeb_HostAddress}}/weather/reports
+Content-Type: application/json
+
+{
+  "temp_c": {{temperature_c}},
+  "humidity_percent": {{humidity}},
+  "location": "{{location}}"
+}
+###
+
+GET {{WeatherWeb_HostAddress}}/weather/format
+Accept: application/json
+###
+
+# GET any reports over 30C
+GET {{WeatherWeb_HostAddress}}/weather/hot
+Accept: application/json
+###
+
+GET {{WeatherWeb_HostAddress}}/weather/filter?minHumidity={{minHumidity}}
+Accept: application/json
+###
+
+GET {{WeatherWeb_HostAddress}}/weather/{{location}}
+Accept: application/json
+###
+
+DELETE {{WeatherWeb_HostAddress}}/weather/reports/{{id}}
+
+###
+
+PUT {{WeatherWeb_HostAddress}}/weather/reports/{{id}}
+Content-Type: application/json
+
+{
+  "temp_c": {{temperature_c}},
+  "humidity_percent": {{humidity}},
+  "location": "{{location}}"
+}
+###
+
+##################################################################
+# FAILURE CASES
+##################################################################
+
+### [FAILURE] POST: Invalid Temperature (Too Hot)
+# Demonstrates FluentValidation: Temperature must be between -100 and 60
+POST {{WeatherWeb_HostAddress}}/weather/reports
+Content-Type: application/json
+
+{
+  "temp_c": 150,
+  "humidity_percent": 0,
+  "location": "The Sun"
+}
+
+### [FAILURE] POST: Invalid Humidity (Negative)]
+# Demonstrates FluentValidation: Humidity must be between 0 and 100
+POST {{WeatherWeb_HostAddress}}/weather/reports
+Content-Type: application/json
+
+{
+  "temp_c": 10,
+  "humidity_percent": -1,
+  "location": "Unknown"
+}
+
+### [FAILURE] POST: Missing Location
+POST {{WeatherWeb_HostAddress}}/weather/reports
+Content-Type: application/json
+
+{
+  "temp_c": 20,
+  "humidity_percent": 50,
+  "location": ""
+}
+
+### [FAILURE] GET: Non-Existent Location
+GET {{WeatherWeb_HostAddress}}/weather/Mars
+Accept: application/json
+
+### [FAILURE] DELETE: Invalid ID
+DELETE {{WeatherWeb_HostAddress}}/weather/reports/-9999
