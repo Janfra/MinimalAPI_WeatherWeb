@@ -1,6 +1,6 @@
 # WeatherWeb API: High-Performance C# Backend
 
-**WeatherWeb** is a robust, production-ready RESTful API built with \*\*.NET 9\*\*. This project serves as a technical demonstration of how architectural principles from AAA game development—such as system decoupling, performance optimization, and rigorous validation—translate into enterprise-grade web services.
+**WeatherWeb** is a robust, production-ready RESTful API built with **.NET 9**. This project serves as a technical demonstration of how architectural principles from AAA game development—such as system decoupling, performance optimization, and rigorous validation—translate into enterprise-grade web services.
 
 ## 🎯 Technical Highlights
 
