@@ -33,27 +33,25 @@ This project demonstrates a "Clean Architecture" approach to web development, fo
 The folder structure follows industry-standard conventions to ensure a clear "blueprint" of the application:
 
 ```text
-
 WeatherWeb/
 
 ├── src/
 
 │   └── WeatherWeb.API/
 
-│       ├── Data/            # Persistence Layer (DbContext \& Migrations)
+│       ├── Data/            # Persistence Layer (DbContext & Migrations)
 
 │       ├── Models/          # Domain Entities and Data Transfer Objects (DTOs)
 
-│       ├── Services/        # Business Logic \& Data Processing
+│       ├── Services/        # Business Logic & Data Processing
 
-│       ├── Mappings/        # API Route Definitions \& Request Handling
+│       ├── Mappings/        # API Route Definitions & Request Handling
 
 │       ├── Middleware/      # Global Safety Nets (Exception Handling)
 
 │       └── Validators/      # Declarative Validation Rules
 
-└── tests/                   # Automated Testing Suite (xUnit \& Moq)
-
+└── tests/                   # Automated Testing Suite (xUnit & Moq)
 ```
 
 ---
