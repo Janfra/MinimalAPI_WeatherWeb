@@ -17,42 +17,14 @@ This project demonstrates a "Clean Architecture" approach to web development, fo
 ## 🛠️ Tech Stack
 
 * **Runtime:** .NET 9 (CoreCLR)
-
+  
 * **ORM:** Entity Framework Core (SQLite)
 
 * **Validation:** FluentValidation
 
 * **API Pattern:** Minimal APIs (high-performance routing)
 
-* **Standardization:** OpenAPI / Problem Details for standard error reporting
-
----
-
-## 📂 Project Organization
-
-The folder structure follows industry-standard conventions to ensure a clear "blueprint" of the application:
-
-```text
-WeatherWeb/
-
-├── src/
-
-│   └── WeatherWeb.API/
-
-│       ├── Data/            # Persistence Layer (DbContext & Migrations)
-
-│       ├── Models/          # Domain Entities and Data Transfer Objects (DTOs)
-
-│       ├── Services/        # Business Logic & Data Processing
-
-│       ├── Mappings/        # API Route Definitions & Request Handling
-
-│       ├── Middleware/      # Global Safety Nets (Exception Handling)
-
-│       └── Validators/      # Declarative Validation Rules
-
-└── tests/                   # Automated Testing Suite (xUnit & Moq)
-```
+* **Error Handling:** RFC 7231 Problem Details via IExceptionHandler
 
 ---
 
@@ -101,7 +73,7 @@ dotnet dev-certs https --check --trust
 
 2. **Run the API**: Start the project using `dotnet run --project src/WeatherWeb.API`.
 
-3. **The "First Run" Sequence**: Since the database starts empty, you must execute the `POST: Create a New Report` request first to populate the SQLite database.
+3. **The "First Run" Sequence**: Since the database starts empty, you must execute the `POST: Create a New Report` request first to seed the SQLite database with initial data.
 
 4. **Explore Edge Cases**: The `.http` file includes dedicated "Failure" cases. These demonstrate the **FluentValidation** logic and **Global Exception Handling**, showing how the API returns standardized `ProblemDetails` when:
 
@@ -138,4 +110,31 @@ Coming from a background in **Game Development (C++/C#)**, I approach web servic
 
 * **Resource Management:** My experience with memory-constrained environments leads me to prioritize efficient data transfer and non-blocking asynchronous operations.
 
+---
+
+## 📂 Project Organization
+
+```text
+WeatherWeb/
+
+├── src/
+
+│   └── WeatherWeb.API/
+
+│       ├── Data/            # Persistence Layer (DbContext & Migrations)
+
+│       ├── Models/          # Domain Entities and Data Transfer Objects (DTOs)
+
+│       ├── Services/        # Business Logic (Reporters & Formatters)
+
+│       ├── Mappings/        # API Route Definitions & Request Handling
+
+│       ├── Middleware/      # Global Exception Handling
+
+│       └── Validators/      # FluentValidation Rules
+
+└── tests/                   # Automated Testing Suite (xUnit & Moq)
+```
+
+---
 
