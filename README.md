@@ -16,7 +16,6 @@ This project demonstrates a "Clean Architecture" approach to web development, fo
 
 ## 🛠️ Tech Stack
 
-
 * **Runtime:** .NET 9 (CoreCLR)
 
 * **ORM:** Entity Framework Core (SQLite)
@@ -96,11 +95,9 @@ For rapid testing without external tools, this project includes a `WeatherWeb.ht
 ```Bash
 
 # Step A: Apply trust
-
 dotnet dev-certs https --trust
 
 # Step B: Verify trust status
-
 dotnet dev-certs https --check --trust
 ```
 
@@ -110,11 +107,11 @@ dotnet dev-certs https --check --trust
 
 4. **Explore Edge Cases**: The `.http` file includes dedicated "Failure" cases. These demonstrate the **FluentValidation** logic and **Global Exception Handling**, showing how the API returns standardized `ProblemDetails` when:
 
-* Temperatures are out of physical bounds (e.g., 150°C).
+    * Temperatures are out of physical bounds (e.g., 150°C).
 
-* Required fields like `Location` are missing.
+    * Required fields like `Location` are missing.
 
-* The client requests a resource that does not exist (404).
+    * The client requests a resource that does not exist (404).
 
 ---
 
@@ -123,20 +120,13 @@ dotnet dev-certs https --check --trust
 The API provides a full suite of CRUD operations, leveraging DTOs to prevent over-posting and protect the internal data model:
 
 | Method | Endpoint | Purpose |
-
-| --- | --- | --- |
-
-| **GET** | `/weather/hot` | Logic-driven filtering for extreme temperatures. |
-
-| **GET** | `/weather/filter` | Query-string filtering for humidity. |
-
-| **POST** | `/weather/reports` | Secure creation using validated DTOs. |
-
-| **GET** | `/weather/{location}` | Route-parameter based lookup. |
-
-| **PUT** | `/weather/reports/{id}` | Idempotent updates to existing weather state. |
-
-| **DELETE** | `/weather/reports/{id}` | Resource removal. |
+| :--- | :--- | :--- |
+| **GET** | `/weather/hot` | Logic-driven filtering for temperatures $\ge 30°C$. |
+| **GET** | `/weather/filter` | Flexible query-string filtering (e.g., `?minHumidity=90.0`). |
+| **GET** | `/weather/{location}` | Route-parameter based lookup for specific regional data. |
+| **POST** | `/weather/reports` | Resource creation utilizing **FluentValidation** and **DTOs**. |
+| **PUT** | `/weather/reports/{id}` | Idempotent updates to existing weather records by unique ID. |
+| **DELETE** | `/weather/reports/{id}` | Secure removal of records from the SQLite persistence layer. |
 
 ---
 
@@ -149,3 +139,5 @@ Coming from a background in **Game Development (C++/C#)**, I approach web servic
 * **System Decoupling:** Just as one would decouple a Physics System from a Rendering System, I have isolated the `WeatherReporter` logic from the `WeatherDbContext`, making the code testable and modular.
 
 * **Resource Management:** My experience with memory-constrained environments leads me to prioritize efficient data transfer and non-blocking asynchronous operations.
+
+
