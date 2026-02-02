@@ -17,6 +17,8 @@ public class WeatherReportDTOValidator : AbstractValidator<WeatherReportDTO>
             .NotEmpty()
             .WithMessage("Location cannot be empty.")
             .MaximumLength(100)
-            .WithMessage("Location cannot exceed 100 characters.");
+            .WithMessage("Location cannot exceed 100 characters.")
+            .Matches("^([a-zA-Z0-9]+\\s)*[a-zA-Z0-9]+$")
+            .WithMessage("Only alphanumeric characters with a single whitespace in between are allowed.");
     }
 }
