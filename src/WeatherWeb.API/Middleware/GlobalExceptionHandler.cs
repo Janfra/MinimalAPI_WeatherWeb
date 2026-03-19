@@ -20,7 +20,11 @@ public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger) : IE
         };
 
         httpContext.Response.StatusCode = problemDetails.Status.Value;
-        await httpContext.Response.WriteAsJsonAsync(problemDetails, cancellationToken);
+        await httpContext.Response.WriteAsJsonAsync(
+            problemDetails,
+            options: null,
+            contentType: "application/problem+json",
+            cancellationToken);
 
         return true;
     }
