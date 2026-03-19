@@ -25,20 +25,20 @@ public class WeatherMapper : IMapper
         app.MapDelete("weather/reports/{id:int}", DeleteReportAsync);
     }
 
-    public async Task<IResult> GetHotReportsAsync(IWeatherReporter reporter, WeatherDbContext database)
+    public async Task<IResult> GetHotReportsAsync(IWeatherReporter reporter, IWeatherDbContext database)
     {
         var hotReportsTask = reporter.GetHotReportsAsync(database.WeatherReports);
         var hotReports = await hotReportsTask;
         return Results.Ok(hotReports);
     }
 
-    public async Task<IResult> GetFormattedReportsAsync(IWeatherReporter reporter, WeatherDbContext database)
+    public async Task<IResult> GetFormattedReportsAsync(IWeatherReporter reporter, IWeatherDbContext database)
     {
         var formattedReports = await reporter.GetFormattedReportsAsync(database.WeatherReports);
         return Results.Ok(formattedReports);
     }
 
-    public async Task<IResult> PostReportDTOAsync(WeatherReportDTO reportDTO, WeatherDbContext database, IValidator<WeatherReportDTO> validator)
+    public async Task<IResult> PostReportDTOAsync(WeatherReportDTO reportDTO, IWeatherDbContext database, IValidator<WeatherReportDTO> validator)
     {
         ValidationResult validationResult = await validator.ValidateAsync(reportDTO);
         if (!validationResult.IsValid)
@@ -46,14 +46,12 @@ public class WeatherMapper : IMapper
             return Results.ValidationProblem(validationResult.ToDictionary());
         }
 
-        var addResult = database.Add<WeatherReport>(reportDTO);
+        var entityAdded = database.Add(reportDTO.ToEntity());
         await database.SaveChangesAsync();
-
-        var entity = addResult.Entity;
-        return Results.Created($"/weather/reports/{entity.Id}", entity);
+        return Results.Created($"/weather/reports/{entityAdded.Id}", entityAdded);
     }
 
-    public async Task<IResult> GetFilteredReportAsync(float? minHumidity, IWeatherReporter reporter, WeatherDbContext database)
+    public async Task<IResult> GetFilteredReportAsync(float? minHumidity, IWeatherReporter reporter, IWeatherDbContext database)
     {
         // minHumidity comes from the URL: /weather/filter?minHumidity=Value
         var threshold = minHumidity ?? 0.0f;
@@ -61,7 +59,7 @@ public class WeatherMapper : IMapper
         return Results.Ok(filtered);
     }
 
-    public async Task<IResult> GetLocationReportsAsync(string location, IWeatherReporter reporter, WeatherDbContext database)
+    public async Task<IResult> GetLocationReportsAsync(string location, IWeatherReporter reporter, IWeatherDbContext database)
     {
         if (string.IsNullOrWhiteSpace(location))
         {
@@ -69,7 +67,7 @@ public class WeatherMapper : IMapper
         }
 
         var locationReports = await reporter.GetLocationReportsAsync(database.WeatherReports, location);
-        if (locationReports is null || !locationReports.Any())
+        if (locationReports is null || locationReports.Count == 0)
         {
             return Results.NotFound($"No weather reports found for location: {location}");
         }
@@ -77,7 +75,7 @@ public class WeatherMapper : IMapper
         return Results.Ok(locationReports);
     }
 
-    public async Task<IResult> PutReportDTOAsync(int id, WeatherReportDTO reportDTO, WeatherDbContext database, IValidator<WeatherReportDTO> validator)
+    public async Task<IResult> PutReportDTOAsync(int id, WeatherReportDTO reportDTO, IWeatherDbContext database, IValidator<WeatherReportDTO> validator)
     {
         ValidationResult validationResult = await validator.ValidateAsync(reportDTO);
         if (!validationResult.IsValid)
@@ -96,7 +94,7 @@ public class WeatherMapper : IMapper
         return Results.NoContent();
     }
 
-    public async Task<IResult> DeleteReportAsync(int id, WeatherDbContext database)
+    public async Task<IResult> DeleteReportAsync(int id, IWeatherDbContext database)
     {
         var existing = await database.WeatherReports.FindAsync(id);
         if (existing is null)
