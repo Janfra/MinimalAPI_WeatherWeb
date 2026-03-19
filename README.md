@@ -1,6 +1,6 @@
-# WeatherWeb API: High-Performance C# Backend
+# WeatherWeb API: C# Backend
 
-**WeatherWeb** is a robust, production-ready RESTful API built with **.NET 9**. This project serves as a technical demonstration of how architectural principles from AAA game development—such as system decoupling, performance optimization, and rigorous validation—translate into enterprise-grade web services.
+**WeatherWeb** is a RESTful API built with **.NET 9**. This project serves as a technical demonstration of how architectural principles from AAA game development—such as system decoupling, performance optimisation, and rigorous validation—translate into enterprise-grade web services.
 
 ## 🎯 Technical Highlights
 
@@ -12,19 +12,19 @@ This project demonstrates a "Clean Architecture" approach to web development, fo
 
 * **Performance-First IO:** Utilized `async/await` and `IQueryable` to ensure database queries are executed efficiently on the SQL engine, minimizing memory overhead.
 
-* **Fault Tolerance:** Integrated a **Global Exception Handler** using the `IExceptionHandler` interface to standardize error responses (RFC 7231) and ensure system stability.
+* **Fault Tolerance:** Integrated a **Global Exception Handler** using the `IExceptionHandler` interface to standardize error responses and ensure system stability.
 
 ## 🛠️ Tech Stack
 
-* **Runtime:** .NET 9 (CoreCLR)
+* **Runtime:** .NET 9
   
 * **ORM:** Entity Framework Core (SQLite)
 
 * **Validation:** FluentValidation
 
-* **API Pattern:** Minimal APIs (high-performance routing)
+* **API Pattern:** Minimal APIs
 
-* **Error Handling:** RFC 7231 Problem Details via `IExceptionHandler`
+* **Error Handling:** Problem Details via `IExceptionHandler`
 
 ---
 
@@ -97,18 +97,6 @@ The API provides a full suite of CRUD operations, leveraging DTOs to prevent ove
 | **POST** | `/weather/reports` | Resource creation utilizing **FluentValidation** and **DTOs**. |
 | **PUT** | `/weather/reports/{id}` | Idempotent updates to existing weather records by unique ID. |
 | **DELETE** | `/weather/reports/{id}` | Secure removal of records from the SQLite persistence layer. |
-
----
-
-## 🧠 From Game Dev to Enterprise C#
-
-Coming from a background in **Game Development (C++/C#)**, I approach web services with a unique perspective on system design:
-
-* **Stateless vs. State-based:** While games manage complex frame-by-frame state, I've designed this API to be entirely stateless, ensuring it can scale horizontally in a cloud environment.
-
-* **System Decoupling:** Just as one would decouple a Physics System from a Rendering System, I have isolated the `WeatherReporter` logic from the `WeatherDbContext`, making the code testable and modular.
-
-* **Resource Management:** My experience with memory-constrained environments leads me to prioritize efficient data transfer and non-blocking asynchronous operations.
 
 ---
 
