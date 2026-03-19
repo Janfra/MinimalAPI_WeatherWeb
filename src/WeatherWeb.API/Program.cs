@@ -8,6 +8,7 @@ using WeatherWeb.Validators;
 using WeatherWeb.Data;
 
 var builder = WebApplication.CreateBuilder(args);
+// Use environment variable or for this scenario, fallback to hardcoded path
 var connectionString = builder.Configuration.GetConnectionString("WeatherDatabase") ?? WeatherDbContext.GetDbPath();
 
 builder.Services.AddOpenApi();
@@ -15,6 +16,7 @@ builder.Services.AddOpenApi();
 builder.Services.AddSingleton<IWeatherFormatter, StandardWeatherFormatter>();
 builder.Services.AddScoped<IWeatherReporter, WeatherReporter>();
 builder.Services.AddDbContext<WeatherDbContext>();
+builder.Services.AddScoped<IWeatherDbContext>(serviceProvider => serviceProvider.GetRequiredService<WeatherDbContext>());
 builder.Services.AddScoped<IValidator<WeatherReportDTO>, WeatherReportDTOValidator>();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
@@ -30,7 +32,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// Register of application mappers
+// Register of application mappers, each mapper will add their CRUD actions.
 IMapper[] mappers = [
     new WeatherMapper()
     ];

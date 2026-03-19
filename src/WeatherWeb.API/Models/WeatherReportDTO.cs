@@ -9,4 +9,6 @@ public record WeatherReportDTO(
 {
     [JsonPropertyName("temp_f")]
     public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+
+    public WeatherReport ToEntity() => new WeatherReport(TemperatureC, Humidity, Location);
 }

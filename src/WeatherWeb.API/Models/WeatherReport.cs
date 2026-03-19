@@ -28,8 +28,5 @@ public class WeatherReport(
         return $"Location: {Location} - Temperature: {TemperatureC}°C, Humidity: {Humidity}%";
     }
 
-    public static implicit operator WeatherReportDTO(WeatherReport report) =>
-        new WeatherReportDTO(report.TemperatureC, report.Humidity, report.Location);
-    public static implicit operator WeatherReport(WeatherReportDTO dto) =>
-        new WeatherReport(dto.TemperatureC, dto.Humidity, dto.Location);
+    public WeatherReportDTO ToDataTransferObject() => new WeatherReportDTO(TemperatureC, Humidity, Location);
 }
