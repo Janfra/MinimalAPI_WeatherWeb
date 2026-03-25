@@ -20,6 +20,7 @@ public class WeatherReportDTOValidatorTests
     [InlineData(15, 50.0f, "City11_", false)] // Invalid: Underscore in location
     [InlineData(15, 50.0f, "City12  A", false)] // Invalid: Consecutive spaces
     [InlineData(15, 50.0f, "", false)] // Invalid: Empty location
+    [InlineData(15, 50.0f, "<script>alert('')</script>", false)]
     public async Task Validate_ShouldReturnExpectedResults(int temperatureC, float humidity, string location, bool isValidExpected)
     {
         // Arrange
