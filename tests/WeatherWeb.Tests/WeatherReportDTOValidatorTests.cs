@@ -18,9 +18,12 @@ public class WeatherReportDTOValidatorTests
     [InlineData(20, 100.1f, "City9", false)] // Invalid: Humidity over limit
     [InlineData(15, 50.0f, "City10 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", false)] // Invalid: Location too long
     [InlineData(15, 50.0f, "City11_", false)] // Invalid: Underscore in location
-    [InlineData(15, 50.0f, "City12  A", false)] // Invalid: Consecutive spaces
+    [InlineData(15, 50.0f, "City12  A", false)] // Invalid: Consecutive spaces in location
     [InlineData(15, 50.0f, "", false)] // Invalid: Empty location
-    [InlineData(15, 50.0f, "<script>alert('')</script>", false)]
+    [InlineData(15, 50.0f, "<script>alert('')</script>", false)] // Invalid: HTML/scripts tags in location
+    [InlineData(15, 50.0f, "<img src=x onerror=alert(1)>", false)] // Invalid: HTML/img tags in location
+    [InlineData(15, 50.0f, "<", false)] // Invalid: Invalid character in location
+    [InlineData(15, 50.0f, "London <UK>", false)] // Invalid: Invalid characters in location
     public async Task Validate_ShouldReturnExpectedResults(int temperatureC, float humidity, string location, bool isValidExpected)
     {
         // Arrange
