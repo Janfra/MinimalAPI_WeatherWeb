@@ -7,16 +7,19 @@ public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger, IHos
 {
     private readonly ILogger<GlobalExceptionHandler> _logger = logger;
     private readonly IHostEnvironment _environment = environment;
+    public const string DefaultErrorDetailInProd = "An internal error occurred. Please contact support if the issue persists.";
+    public const string DetailsContentType = "application/problem+json";
+    public const string ProblemDetailsDefaultTitle = "An unexpected Server Error occurred.";
 
     public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
     {
         _logger.LogError(exception, "An unhandled exception occurred while processing the request. {Message}", exception.Message);
 
         // In production replace message to avoid leaking sensitive information and provide more relevant information to the user.
-        var detail = _environment.IsDevelopment() ? exception.ToString() : "An internal error ocurred. Please support if the issue persists."; 
+        var detail = _environment.IsDevelopment() ? exception.ToString() : DefaultErrorDetailInProd; 
         var problemDetails = new ProblemDetails
         {
-            Title = "An unexpected Server Error occurred.",
+            Title = ProblemDetailsDefaultTitle,
             Detail = detail,
             Status = StatusCodes.Status500InternalServerError,
             Instance = httpContext.Request.Path,
@@ -28,7 +31,7 @@ public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger, IHos
         await httpContext.Response.WriteAsJsonAsync(
             problemDetails,
             options: null,
-            contentType: "application/problem+json",
+            contentType: DetailsContentType,
             cancellationToken);
 
         return true;
