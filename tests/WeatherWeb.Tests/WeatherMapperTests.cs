@@ -19,10 +19,10 @@ public class WeatherMapperTests
         var hotThreshold = 0;
         var testData = new List<WeatherReport>
         {
-            new(TemperatureC: 60, Humidity: 50.0f, Location: "CityA") { Id = 1 },
-            new(TemperatureC: -100, Humidity: 50.0f, Location: "CityB") { Id = 2 },
-            new(TemperatureC: 0, Humidity: 50.0f, Location: "CityC") { Id = 3 },
-            new(TemperatureC: 1, Humidity: 50.0f, Location: "CityC") { Id = 4 },
+            new(temperatureC: 60, humidity: 50.0f, location: "CityA") { Id = 1 },
+            new(temperatureC: -100, humidity: 50.0f, location: "CityB") { Id = 2 },
+            new(temperatureC: 0, humidity: 50.0f, location: "CityC") { Id = 3 },
+            new(temperatureC: 1, humidity: 50.0f, location: "CityC") { Id = 4 },
         };
         var mockDb = CreateMockFromTestData(testData);
         var mapper = new WeatherMapper();
@@ -49,8 +49,8 @@ public class WeatherMapperTests
 
         var testData = new List<WeatherReport>
         {
-            new(TemperatureC: 60, Humidity: 50.0f, Location: "CityA") { Id = 1 },
-            new(TemperatureC: -100, Humidity: 30.0f, Location: "CityB") { Id = 2 },
+            new(temperatureC: 60, humidity: 50.0f, location: "CityA") { Id = 1 },
+            new(temperatureC: -100, humidity: 30.0f, location: "CityB") { Id = 2 },
         };
         var mockDb = CreateMockFromTestData(testData);
         var mapper = new WeatherMapper();
@@ -164,8 +164,8 @@ public class WeatherMapperTests
         var minHumidity = 30.0f;
         var testData = new List<WeatherReport>
         {
-            new(TemperatureC: 10, Humidity: minHumidity, Location: "CityA") { Id = 1 },
-            new(TemperatureC: 20, Humidity: minHumidity + 0.1f, Location: "CityB") { Id = 2 },
+            new(temperatureC: 10, humidity: minHumidity, location: "CityA") { Id = 1 },
+            new(temperatureC: 20, humidity: minHumidity + 0.1f, location: "CityB") { Id = 2 },
         };
         var mockDb = CreateMockFromTestData(testData);
         var mapper = new WeatherMapper();
@@ -187,8 +187,8 @@ public class WeatherMapperTests
         var location = "CityA";
         var testData = new List<WeatherReport>
         {
-            new(TemperatureC: 10, Humidity: 10.0f, Location: location) { Id = 1 },
-            new(TemperatureC: 20, Humidity: 30.0f, Location: location) { Id = 2 },
+            new(temperatureC: 10, humidity: 10.0f, location: location) { Id = 1 },
+            new(temperatureC: 20, humidity: 30.0f, location: location) { Id = 2 },
         };
 
         var mockDb = CreateMockFromTestData(testData);
