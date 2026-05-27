@@ -1,18 +1,18 @@
 # WeatherWeb API: C# Backend
 
-**WeatherWeb** is a RESTful API built with **.NET 9**. This project serves as a technical demonstration of how architectural principles from AAA game development—such as system decoupling, performance optimisation, and rigorous validation—translate into enterprise-grade web services.
+**WeatherWeb** is a RESTful API built with **.NET 9**. This project was created to learn about how web development backend functions. Explores Minimal APIs, and how system decoupling, performance optimisation, and validation can be applied in web services.
 
 ## 🎯 Technical Highlights
-
-This project demonstrates a "Clean Architecture" approach to web development, focusing on maintainability and the **Uniform Interface** constraint of REST:
 
 * **Layered Separation:** Decoupled the Database (EF Core), the Business Logic (Services), and the API Surface (Mappings).
 
 * **Data Integrity:** Implemented **FluentValidation** to enforce strict guard clauses on incoming data, preventing corrupted state in the persistence layer.
 
-* **Performance-First IO:** Utilized `async/await` and `IQueryable` to ensure database queries are executed efficiently on the SQL engine, minimizing memory overhead.
+* **Performance-First IO:** Utilised `async/await` and `IQueryable` to ensure database queries are executed efficiently on the SQL engine, minimising memory overhead.
 
-* **Fault Tolerance:** Integrated a **Global Exception Handler** using the `IExceptionHandler` interface to standardize error responses and ensure system stability.
+* **Error Handling:** Integrated a **Global Exception Handler** using the `IExceptionHandler` interface to standardise error responses.
+
+---
 
 ## 🛠️ Tech Stack
 
@@ -58,9 +58,9 @@ dotnet run --project src/WeatherWeb.API
 
 ## 🧪 Quick Verification (REST Client)
 
-For rapid testing without external tools, this project includes a `WeatherWeb.http` file compatible with the **Visual Studio / VS Code REST Client**.
+For manual testing, this project includes a `WeatherWeb.http` file compatible with the **Visual Studio / VS Code REST Client**.
 
-1. **Trust \& Verify the Local Certificate**: Ensure your machine trusts the .NET development certificate so the firewall does not block local HTTPS traffic.
+1. **Trust & Verify the Local Certificate**: Ensure your machine trusts the .NET development certificate so the firewall does not block local HTTPS traffic.
 
 ```Bash
 
@@ -73,10 +73,9 @@ dotnet dev-certs https --check --trust
 
 2. **Run the API**: Start the project using `dotnet run --project src/WeatherWeb.API`.
 
-3. **The "First Run" Sequence**: Since the database starts empty, you must execute the `POST: Create a New Report` request first to seed the SQLite database with initial data.
+3. **The "First Run" Sequence**: Since the database starts empty, you must execute the `POST: Create a New Report` request first to populate the SQLite database with initial data.
 
-4. **Explore Edge Cases**: The `.http` file includes dedicated "Failure" cases. These demonstrate the **FluentValidation** logic and **Global Exception Handling**, showing how the API returns standardized `ProblemDetails` when:
-
+4. **Explore Edge Cases**: The `.http` file includes dedicated "Failure" cases. These demonstrate the **FluentValidation** logic and **Global Exception Handling**, showing how the API returns standardised `ProblemDetails` when:
     * Temperatures are out of physical bounds (e.g., 150°C).
 
     * Required fields like `Location` are missing.
