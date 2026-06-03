@@ -111,11 +111,11 @@ public class WeatherMapperTests
             ]));
 
         // Act
-        var result = await mapper.PostReportDTOAsync(invalidReportDTO, mockDb.Object, mockValidator.Object);
+        var results = await mapper.PostReportDTOAsync(invalidReportDTO, mockDb.Object, mockValidator.Object);
 
         // Assert
-        Assert.IsType<ProblemHttpResult>(result);
-        if (result is ProblemHttpResult validationProblem)
+        Assert.IsType<ValidationProblem>(results.Result);
+        if (results.Result is ValidationProblem validationProblem)
         {
             Assert.IsType<HttpValidationProblemDetails>(validationProblem.ProblemDetails);
             if (validationProblem.ProblemDetails is HttpValidationProblemDetails validationProblemDetails)
@@ -148,10 +148,10 @@ public class WeatherMapperTests
         .ReturnsAsync(new FluentValidation.Results.ValidationResult());
 
         // Act
-        var result = await mapper.PostReportDTOAsync(testData, mockDb.Object, mockValidator.Object);
+        var results = await mapper.PostReportDTOAsync(testData, mockDb.Object, mockValidator.Object);
 
         // Assert
-        var createdResult = AssertResultHasValue<Created<WeatherReport>>(result);
+        var createdResult = AssertResultHasValue<Created<WeatherReport>>(results.Result);
         var createdEntity = createdResult.Value;
         Assert.Equal(createdEntity, testResultData);
         Assert.Contains($"/weather/reports/{createdEntity.Id}", createdResult.Location);
@@ -197,10 +197,10 @@ public class WeatherMapperTests
         mockReporter.Setup(r => r.GetLocationReportsAsync(It.IsAny<IQueryable<WeatherReport>>(), location, It.IsAny<CancellationToken>())).ReturnsAsync(testData);
 
         // Act
-        var result = await mapper.GetLocationReportsAsync(location, mockReporter.Object, mockDb.Object);
+        var results = await mapper.GetLocationReportsAsync(location, mockReporter.Object, mockDb.Object);
 
         // Assert
-        var okResult = AssertResultHasValue<Ok<IReadOnlyList<WeatherReport>>>(result);
+        var okResult = AssertResultHasValue<Ok<IReadOnlyList<WeatherReport>>>(results.Result);
         AssertResultValuesMatchList(okResult, testData);
     }
 
