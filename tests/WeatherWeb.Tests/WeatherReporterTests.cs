@@ -16,10 +16,10 @@ public class WeatherReporterTests
         var weatherReporter = new WeatherReporter(mockFormatter.Object);
 
         var testData = new List<WeatherReport> {
-            new(TemperatureC: WeatherReporter.HOT_THRESHOLD_DEGREES, Humidity: 50, Location: "CityA"),
-            new(TemperatureC: WeatherReporter.HOT_THRESHOLD_DEGREES - 1, Humidity: 80, Location: "CityB"),
-            new(TemperatureC: WeatherReporter.HOT_THRESHOLD_DEGREES + 1, Humidity: 80, Location: "CityC"),
-            new(TemperatureC: 60, Humidity: 65, Location: "CityD")
+            new(temperatureC: WeatherReporter.HOT_THRESHOLD_DEGREES, humidity: 50, location: "CityA"),
+            new(temperatureC: WeatherReporter.HOT_THRESHOLD_DEGREES - 1, humidity: 80, location: "CityB"),
+            new(temperatureC: WeatherReporter.HOT_THRESHOLD_DEGREES + 1, humidity: 80, location: "CityC"),
+            new(temperatureC: 60, humidity: 65, location: "CityD")
         };
 
         var mockDbSet = testData.BuildMockDbSet().Object;
@@ -43,11 +43,11 @@ public class WeatherReporterTests
         var weatherReporter = new WeatherReporter(mockFormatter.Object);
         var targetLocation = "CityA";
         var testData = new List<WeatherReport> {
-            new(TemperatureC: 25, Humidity: 50, Location: targetLocation),
-            new(TemperatureC: 30, Humidity: 80, Location: "CityB"),
-            new(TemperatureC: 20, Humidity: 80, Location: targetLocation),
-            new(TemperatureC: 15, Humidity: 65, Location: "CityC"),
-            new(TemperatureC: 10, Humidity: 65, Location: "CityB")
+            new(temperatureC: 25, humidity: 50, location: targetLocation),
+            new(temperatureC: 30, humidity: 80, location: "CityB"),
+            new(temperatureC: 20, humidity: 80, location: targetLocation),
+            new(temperatureC: 15, humidity: 65, location: "CityC"),
+            new(temperatureC: 10, humidity: 65, location: "CityB")
         };
         var mockDbSet = testData.BuildMockDbSet().Object;
 
@@ -69,9 +69,9 @@ public class WeatherReporterTests
         var weatherReporter = new WeatherReporter(mockFormatter.Object);
         var humidityThreshold = 70.0f;
         var testData = new List<WeatherReport> {
-            new(TemperatureC: 25, Humidity: humidityThreshold, Location: "CityA"), // Meet
-            new(TemperatureC: 30, Humidity: humidityThreshold + 1, Location: "CityB"), // Meet
-            new(TemperatureC: 20, Humidity: humidityThreshold - 1, Location: "CityC"), // Below
+            new(temperatureC: 25, humidity: humidityThreshold, location: "CityA"), // Meet
+            new(temperatureC: 30, humidity: humidityThreshold + 1, location: "CityB"), // Meet
+            new(temperatureC: 20, humidity: humidityThreshold - 1, location: "CityC"), // Below
         };
         var mockDbSet = testData.BuildMockDbSet().Object;
 
@@ -99,9 +99,9 @@ public class WeatherReporterTests
             .Returns<WeatherReport>(MockFormat);
         var weatherReporter = new WeatherReporter(mockFormatter.Object);
         var testData = new List<WeatherReport> {
-            new(TemperatureC: 25, Humidity: 50, Location: "CityA"),
-            new(TemperatureC: 30, Humidity: 80, Location: "CityB"),
-            new(TemperatureC: 20, Humidity: 80, Location: "CityC"),
+            new(temperatureC: 25, humidity: 50, location: "CityA"),
+            new(temperatureC: 30, humidity: 80, location: "CityB"),
+            new(temperatureC: 20, humidity: 80, location: "CityC"),
         };
         var mockDbSet = testData.BuildMockDbSet().Object;
 

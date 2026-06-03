@@ -1,30 +1,30 @@
-# WeatherWeb API: High-Performance C# Backend
+# WeatherWeb API: C# Backend
 
-**WeatherWeb** is a robust, production-ready RESTful API built with **.NET 9**. This project serves as a technical demonstration of how architectural principles from AAA game development—such as system decoupling, performance optimization, and rigorous validation—translate into enterprise-grade web services.
+**WeatherWeb** is a RESTful API built with **.NET 9**. This project was created to learn about how web development backend functions. Explores Minimal APIs, and how system decoupling, performance optimisation, and validation can be applied in web services.
 
 ## 🎯 Technical Highlights
-
-This project demonstrates a "Clean Architecture" approach to web development, focusing on maintainability and the **Uniform Interface** constraint of REST:
 
 * **Layered Separation:** Decoupled the Database (EF Core), the Business Logic (Services), and the API Surface (Mappings).
 
 * **Data Integrity:** Implemented **FluentValidation** to enforce strict guard clauses on incoming data, preventing corrupted state in the persistence layer.
 
-* **Performance-First IO:** Utilized `async/await` and `IQueryable` to ensure database queries are executed efficiently on the SQL engine, minimizing memory overhead.
+* **Performance-First IO:** Utilised `async/await` and `IQueryable` to ensure database queries are executed efficiently on the SQL engine, minimising memory overhead.
 
-* **Fault Tolerance:** Integrated a **Global Exception Handler** using the `IExceptionHandler` interface to standardize error responses (RFC 7231) and ensure system stability.
+* **Error Handling:** Integrated a **Global Exception Handler** using the `IExceptionHandler` interface to standardise error responses.
+
+---
 
 ## 🛠️ Tech Stack
 
-* **Runtime:** .NET 9 (CoreCLR)
+* **Runtime:** .NET 9
   
 * **ORM:** Entity Framework Core (SQLite)
 
 * **Validation:** FluentValidation
 
-* **API Pattern:** Minimal APIs (high-performance routing)
+* **API Pattern:** Minimal APIs
 
-* **Error Handling:** RFC 7231 Problem Details via `IExceptionHandler`
+* **Error Handling:** Problem Details via `IExceptionHandler`
 
 ---
 
@@ -58,9 +58,9 @@ dotnet run --project src/WeatherWeb.API
 
 ## 🧪 Quick Verification (REST Client)
 
-For rapid testing without external tools, this project includes a `WeatherWeb.http` file compatible with the **Visual Studio / VS Code REST Client**.
+For manual testing, this project includes a `WeatherWeb.http` file compatible with the **Visual Studio / VS Code REST Client**.
 
-1. **Trust \& Verify the Local Certificate**: Ensure your machine trusts the .NET development certificate so the firewall does not block local HTTPS traffic.
+1. **Trust & Verify the Local Certificate**: Ensure your machine trusts the .NET development certificate so the firewall does not block local HTTPS traffic.
 
 ```Bash
 
@@ -73,10 +73,9 @@ dotnet dev-certs https --check --trust
 
 2. **Run the API**: Start the project using `dotnet run --project src/WeatherWeb.API`.
 
-3. **The "First Run" Sequence**: Since the database starts empty, you must execute the `POST: Create a New Report` request first to seed the SQLite database with initial data.
+3. **The "First Run" Sequence**: Since the database starts empty, you must execute the `POST: Create a New Report` request first to populate the SQLite database with initial data.
 
-4. **Explore Edge Cases**: The `.http` file includes dedicated "Failure" cases. These demonstrate the **FluentValidation** logic and **Global Exception Handling**, showing how the API returns standardized `ProblemDetails` when:
-
+4. **Explore Edge Cases**: The `.http` file includes dedicated "Failure" cases. These demonstrate the **FluentValidation** logic and **Global Exception Handling**, showing how the API returns standardised `ProblemDetails` when:
     * Temperatures are out of physical bounds (e.g., 150°C).
 
     * Required fields like `Location` are missing.
@@ -97,18 +96,6 @@ The API provides a full suite of CRUD operations, leveraging DTOs to prevent ove
 | **POST** | `/weather/reports` | Resource creation utilizing **FluentValidation** and **DTOs**. |
 | **PUT** | `/weather/reports/{id}` | Idempotent updates to existing weather records by unique ID. |
 | **DELETE** | `/weather/reports/{id}` | Secure removal of records from the SQLite persistence layer. |
-
----
-
-## 🧠 From Game Dev to Enterprise C#
-
-Coming from a background in **Game Development (C++/C#)**, I approach web services with a unique perspective on system design:
-
-* **Stateless vs. State-based:** While games manage complex frame-by-frame state, I've designed this API to be entirely stateless, ensuring it can scale horizontally in a cloud environment.
-
-* **System Decoupling:** Just as one would decouple a Physics System from a Rendering System, I have isolated the `WeatherReporter` logic from the `WeatherDbContext`, making the code testable and modular.
-
-* **Resource Management:** My experience with memory-constrained environments leads me to prioritize efficient data transfer and non-blocking asynchronous operations.
 
 ---
 
