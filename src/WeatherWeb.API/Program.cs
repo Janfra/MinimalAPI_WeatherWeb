@@ -1,27 +1,12 @@
-using FluentValidation;
-using WeatherWeb.Services.Formatter;
-using WeatherWeb.Services.Reporter;
-using WeatherWeb.Mappers;
-using WeatherWeb.Models;
 using WeatherWeb.Middleware;
-using WeatherWeb.Validators;
-using WeatherWeb.Data;
+using WeatherWeb.EndpointMappers;
+using WeatherWeb.ServiceConfigurators;
 
 using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
-// Use environment variable or fallback to hardcoded path
-var connectionString = builder.Configuration.GetConnectionString("WeatherDatabase") ?? WeatherDbContext.GetDbPath();
 
 builder.Services.AddOpenApi();
-
-builder.Services.AddSingleton<IWeatherFormatter, StandardWeatherFormatter>();
-builder.Services.AddScoped<IWeatherReporter, WeatherReporter>();
-builder.Services.AddDbContext<WeatherDbContext>();
-builder.Services.AddScoped<IWeatherDbContext>(
-    serviceProvider => serviceProvider.GetRequiredService<WeatherDbContext>()
-);
-builder.Services.AddScoped<IValidator<WeatherReportDTO>, WeatherReportDTOValidator>();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 builder.Services.AddRateLimiter(
@@ -72,6 +57,7 @@ builder.Services.AddRateLimiter(
         options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
     }
 );
+builder.Services.AddWeatherServices();
 
 var app = builder.Build();
 app.UseRateLimiter();
@@ -84,15 +70,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
-// Register of application mappers, each mapper will add their CRUD actions.
-IMapper[] mappers = [
-    new WeatherMapper()
-    ];
-
-foreach (var mapper in mappers)
-{
-    mapper.Map(app);
-}
+app.MapWeatherEndpoints();
 
 app.Run();
