@@ -7,18 +7,8 @@ public class WeatherReportDTOValidator : AbstractValidator<WeatherReportDTO>
 {
     public WeatherReportDTOValidator()
     {
-        RuleFor(report => report.TemperatureC)
-            .InclusiveBetween(-100, 60)
-            .WithMessage("Temperature must be between -100°C and 60°C.");
-        RuleFor(report => report.Humidity)
-            .InclusiveBetween(0, 100)
-            .WithMessage("Humidity must be between 0% and 100%.");
-        RuleFor(report => report.Location)
-            .NotEmpty()
-            .WithMessage("Location cannot be empty.")
-            .MaximumLength(100)
-            .WithMessage("Location cannot exceed 100 characters.")
-            .Matches("^([a-zA-Z0-9]+\\s)*[a-zA-Z0-9]+$")
-            .WithMessage("Only alphanumeric characters with a single whitespace in between are allowed.");
+        RuleFor(report => report.TemperatureC).SetValidator(new TemperatureCValidator());
+        RuleFor(report => report.Humidity).SetValidator(new HumidityValidator());
+        RuleFor(report => report.Location).SetValidator(new LocationValidator());
     }
 }
