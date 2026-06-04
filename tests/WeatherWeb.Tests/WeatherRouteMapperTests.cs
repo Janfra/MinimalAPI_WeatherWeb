@@ -6,11 +6,12 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using MockQueryable.Moq;
 using Moq;
 using WeatherWeb.Data;
-using WeatherWeb.Mappers;
+using WeatherWeb.EndpointMappers;
 using WeatherWeb.Models;
 using WeatherWeb.Services.Reporter;
+using WeatherWeb.Tests.Extensions;
 
-public class WeatherMapperTests
+public class WeatherRouteMapperTests
 {
     [Fact]
     public async Task GetHotReportsAsync_ShouldReturnOkResult()
@@ -25,14 +26,12 @@ public class WeatherMapperTests
             new(temperatureC: 1, humidity: 50.0f, location: "CityC") { Id = 4 },
         };
         var mockDb = CreateMockFromTestData(testData);
-        var mapper = new WeatherMapper();
-
         var mockReporter = new Mock<IWeatherReporter>();
         mockReporter.Setup(r => r.GetHotReportsAsync(It.IsAny<IQueryable<WeatherReport>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(testData.Where(r => r.TemperatureC > hotThreshold).ToList());
 
         // Act
-        var result = await mapper.GetHotReportsAsync(mockReporter.Object, mockDb.Object);
+        var result = await WeatherRouteMapper.GetHotReportsAsync(mockReporter.Object, mockDb.Object);
 
         // Assert
         var okResult = AssertResultHasValue<Ok<IReadOnlyList<WeatherReport>>>(result);
@@ -53,13 +52,12 @@ public class WeatherMapperTests
             new(temperatureC: -100, humidity: 30.0f, location: "CityB") { Id = 2 },
         };
         var mockDb = CreateMockFromTestData(testData);
-        var mapper = new WeatherMapper();
         var mockReporter = new Mock<IWeatherReporter>();
         mockReporter.Setup(r => r.GetFormattedReportsAsync(It.IsAny<IQueryable<WeatherReport>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(testData.Select(MockFormat).ToList());
 
         // Act
-        var result = await mapper.GetFormattedReportsAsync(mockReporter.Object, mockDb.Object);
+        var result = await WeatherRouteMapper.GetFormattedReportsAsync(mockReporter.Object, mockDb.Object);
 
         // Assert
         var okResult = AssertResultHasValue<Ok<IReadOnlyList<string>>>(result);
@@ -77,13 +75,12 @@ public class WeatherMapperTests
         // Arrange
         var testData = new List<WeatherReport>();
         var mockDb = CreateMockFromTestData(testData);
-        var mapper = new WeatherMapper();
         var mockReporter = new Mock<IWeatherReporter>();
         mockReporter.Setup(r => r.GetFormattedReportsAsync(It.IsAny<IQueryable<WeatherReport>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(testData.Select(r => r.ToString()).ToList());
 
         // Act
-        var result = await mapper.GetFormattedReportsAsync(mockReporter.Object, mockDb.Object);
+        var result = await WeatherRouteMapper.GetFormattedReportsAsync(mockReporter.Object, mockDb.Object);
 
         // Assert
         var okResult = AssertResultHasValue<Ok<IReadOnlyList<string>>>(result);
@@ -99,8 +96,6 @@ public class WeatherMapperTests
             Humidity: 50.0f,
             Location: "CityA"
         );
-        var mockDb = new Mock<IWeatherDbContext>();
-        var mapper = new WeatherMapper();
         var errorKey = "TemperatureC";
         var errorMessage = "TemperatureC must be between -100 and 60.";
         var mockValidator = new Mock<IValidator<WeatherReportDTO>>();
@@ -109,13 +104,15 @@ public class WeatherMapperTests
             [
                 new FluentValidation.Results.ValidationFailure(errorKey, errorMessage)
             ]));
+        var mockFilterContext = new Mock<EndpointFilterInvocationContext>().AddArgumentToMock(invalidReportDTO).AddServiceToMock(mockValidator.Object);
+        var mockNext = new Mock<EndpointFilterDelegate>();
 
         // Act
-        var results = await mapper.PostReportDTOAsync(invalidReportDTO, mockDb.Object, mockValidator.Object);
+        var result = await WeatherRouteMapper.ValidateReportDTO(mockFilterContext.Object, mockNext.Object);
 
         // Assert
-        Assert.IsType<ValidationProblem>(results.Result);
-        if (results.Result is ValidationProblem validationProblem)
+        Assert.IsType<ValidationProblem>(result);
+        if (result is ValidationProblem validationProblem)
         {
             Assert.IsType<HttpValidationProblemDetails>(validationProblem.ProblemDetails);
             if (validationProblem.ProblemDetails is HttpValidationProblemDetails validationProblemDetails)
@@ -135,23 +132,16 @@ public class WeatherMapperTests
             Humidity: 50.0f,
             Location: "CityA"
             );
-
         WeatherReport testResultData = new(testData.TemperatureC, testData.Humidity, testData.Location) { Id = 1 };
-
         var mockDb = CreateMockFromTestData(new());
         mockDb.Setup(db => db.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
         mockDb.Setup(db => db.Add<WeatherReport>(It.IsAny<WeatherReport>())).Returns(testResultData);
 
-        var mapper = new WeatherMapper();
-        var mockValidator = new Mock<IValidator<WeatherReportDTO>>();
-        mockValidator.Setup(v => v.ValidateAsync(testData, It.IsAny<CancellationToken>()))
-        .ReturnsAsync(new FluentValidation.Results.ValidationResult());
-
         // Act
-        var results = await mapper.PostReportDTOAsync(testData, mockDb.Object, mockValidator.Object);
+        var result = await WeatherRouteMapper.PostReportDTOAsync(testData, mockDb.Object);
 
         // Assert
-        var createdResult = AssertResultHasValue<Created<WeatherReport>>(results.Result);
+        var createdResult = AssertResultHasValue<Created<WeatherReport>>(result);
         var createdEntity = createdResult.Value;
         Assert.Equal(createdEntity, testResultData);
         Assert.Contains($"/weather/reports/{createdEntity.Id}", createdResult.Location);
@@ -168,12 +158,11 @@ public class WeatherMapperTests
             new(temperatureC: 20, humidity: minHumidity + 0.1f, location: "CityB") { Id = 2 },
         };
         var mockDb = CreateMockFromTestData(testData);
-        var mapper = new WeatherMapper();
         var mockReporter = new Mock<IWeatherReporter>();
         mockReporter.Setup(r => r.GetMinHumidityReportsAsync(It.IsAny<IQueryable<WeatherReport>>(), minHumidity, It.IsAny<CancellationToken>())).ReturnsAsync(testData);
 
         // Act
-        var result = await mapper.GetFilteredReportAsync(minHumidity, mockReporter.Object, mockDb.Object);
+        var result = await WeatherRouteMapper.GetFilteredReportAsync(minHumidity, mockReporter.Object, mockDb.Object);
 
         // Assert
         var resultOk = AssertResultHasValue<Ok<IReadOnlyList<WeatherReport>>>(result);
@@ -192,12 +181,11 @@ public class WeatherMapperTests
         };
 
         var mockDb = CreateMockFromTestData(testData);
-        var mapper = new WeatherMapper();
         var mockReporter = new Mock<IWeatherReporter>();
         mockReporter.Setup(r => r.GetLocationReportsAsync(It.IsAny<IQueryable<WeatherReport>>(), location, It.IsAny<CancellationToken>())).ReturnsAsync(testData);
 
         // Act
-        var results = await mapper.GetLocationReportsAsync(location, mockReporter.Object, mockDb.Object);
+        var results = await WeatherRouteMapper.GetLocationReportsAsync(location, mockReporter.Object, mockDb.Object);
 
         // Assert
         var okResult = AssertResultHasValue<Ok<IReadOnlyList<WeatherReport>>>(results.Result);
@@ -206,7 +194,7 @@ public class WeatherMapperTests
 
 
 
-    private TResult AssertResultHasValue<TResult>(IResult result) where TResult : IResult, IValueHttpResult
+    private static TResult AssertResultHasValue<TResult>(IResult result) where TResult : IResult, IValueHttpResult
     {
         Assert.IsType<TResult>(result);
         if (result is TResult valueResult)
@@ -218,7 +206,7 @@ public class WeatherMapperTests
         throw new InvalidCastException($"Assert returned that provided type was valid in {nameof(AssertResultHasValue)}, however cast to type failed."); // Should never happen due to assert
     }
 
-    private void AssertResultValuesMatchList<TResult, TItem>(TResult result, List<TItem> testData) 
+    private static void AssertResultValuesMatchList<TResult, TItem>(TResult result, List<TItem> testData) 
         where TItem : class
         where TResult : IResult, IValueHttpResult<IReadOnlyList<TItem>>
     {
@@ -232,7 +220,7 @@ public class WeatherMapperTests
         }
     }
 
-    private Mock<IWeatherDbContext> CreateMockFromTestData(List<WeatherReport> testData)
+    private static Mock<IWeatherDbContext> CreateMockFromTestData(List<WeatherReport> testData)
     {
         var mockSet = testData.BuildMockDbSet();
         var mockDb = new Mock<IWeatherDbContext>();
