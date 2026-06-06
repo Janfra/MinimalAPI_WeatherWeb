@@ -35,7 +35,7 @@ public class WeatherRouteMapperTests
 
         // Assert
         var okResult = AssertResultHasValue<Ok<IReadOnlyList<WeatherReport>>>(result);
-        var reports = okResult.Value;
+        var reports = okResult.Value!;
         Assert.Equal(2, reports.Count);
         Assert.All(reports, r => Assert.True(r.TemperatureC > 0));
     }
@@ -61,7 +61,7 @@ public class WeatherRouteMapperTests
 
         // Assert
         var okResult = AssertResultHasValue<Ok<IReadOnlyList<string>>>(result);
-        var reports = okResult.Value;
+        var reports = okResult.Value!;
         Assert.Equal(testData.Count, reports.Count);
         for (int i = 0; i < testData.Count; i++)
         {
@@ -84,7 +84,7 @@ public class WeatherRouteMapperTests
 
         // Assert
         var okResult = AssertResultHasValue<Ok<IReadOnlyList<string>>>(result);
-        Assert.Empty(okResult.Value);
+        Assert.Empty(okResult.Value!);
     }
 
     [Fact]
@@ -142,7 +142,7 @@ public class WeatherRouteMapperTests
 
         // Assert
         var createdResult = AssertResultHasValue<Created<WeatherReport>>(result);
-        var createdEntity = createdResult.Value;
+        var createdEntity = createdResult.Value!;
         Assert.Equal(createdEntity, testResultData);
         Assert.Contains($"/weather/reports/{createdEntity.Id}", createdResult.Location);
     }
