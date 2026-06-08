@@ -26,6 +26,8 @@
 
 * **Error Handling:** Problem Details via `IExceptionHandler`
 
+* **Testing:** xUnit
+
 ---
 
 ## 🚦 Getting Started
