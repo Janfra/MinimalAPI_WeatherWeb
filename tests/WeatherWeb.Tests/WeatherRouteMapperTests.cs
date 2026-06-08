@@ -34,10 +34,10 @@ public class WeatherRouteMapperTests
         var result = await WeatherRouteMapper.GetHotReportsAsync(mockReporter.Object, mockDb.Object);
 
         // Assert
-        var okResult = AssertResultHasValue<Ok<IReadOnlyList<WeatherReport>>>(result);
-        var reports = okResult.Value;
+        Assert.NotNull(result);
+        var reports = AssertResultValue(result);
         Assert.Equal(2, reports.Count);
-        Assert.All(reports, r => Assert.True(r.TemperatureC > 0));
+        Assert.All(reports, r => Assert.True(r.TemperatureC > hotThreshold));
     }
 
     [Fact]
@@ -60,12 +60,12 @@ public class WeatherRouteMapperTests
         var result = await WeatherRouteMapper.GetFormattedReportsAsync(mockReporter.Object, mockDb.Object);
 
         // Assert
-        var okResult = AssertResultHasValue<Ok<IReadOnlyList<string>>>(result);
-        var reports = okResult.Value;
+        Assert.NotNull(result);
+        var reports = AssertResultValue(result);
         Assert.Equal(testData.Count, reports.Count);
         for (int i = 0; i < testData.Count; i++)
         {
-            Assert.Contains(MockFormat(testData[i]), reports);
+            Assert.Contains(MockFormat(testData[i]), reports); // Go through for loop instead of assert equal since data needs to be formatted to match
         }
     }
 
@@ -83,8 +83,9 @@ public class WeatherRouteMapperTests
         var result = await WeatherRouteMapper.GetFormattedReportsAsync(mockReporter.Object, mockDb.Object);
 
         // Assert
-        var okResult = AssertResultHasValue<Ok<IReadOnlyList<string>>>(result);
-        Assert.Empty(okResult.Value);
+        Assert.NotNull(result);
+        var resultValue = AssertResultValue(result);
+        Assert.Empty(resultValue);
     }
 
     [Fact]
@@ -111,16 +112,10 @@ public class WeatherRouteMapperTests
         var result = await WeatherRouteMapper.ValidateReportDTO(mockFilterContext.Object, mockNext.Object);
 
         // Assert
-        Assert.IsType<ValidationProblem>(result);
-        if (result is ValidationProblem validationProblem)
-        {
-            Assert.IsType<HttpValidationProblemDetails>(validationProblem.ProblemDetails);
-            if (validationProblem.ProblemDetails is HttpValidationProblemDetails validationProblemDetails)
-            {
-                Assert.True(validationProblemDetails.Errors.ContainsKey(errorKey));
-                Assert.Contains(errorMessage, validationProblemDetails.Errors[errorKey]);
-            }
-        }
+        var validationProblem = Assert.IsType<ValidationProblem>(result);
+        var validationProblemDetails = Assert.IsType<HttpValidationProblemDetails>(validationProblem.ProblemDetails);
+        Assert.True(validationProblemDetails.Errors.ContainsKey(errorKey));
+        Assert.Contains(errorMessage, validationProblemDetails.Errors[errorKey]);
     }
 
     [Fact]
@@ -141,10 +136,10 @@ public class WeatherRouteMapperTests
         var result = await WeatherRouteMapper.PostReportDTOAsync(testData, mockDb.Object);
 
         // Assert
-        var createdResult = AssertResultHasValue<Created<WeatherReport>>(result);
-        var createdEntity = createdResult.Value;
+        Assert.NotNull(result);
+        var createdEntity = AssertResultValue(result);
         Assert.Equal(createdEntity, testResultData);
-        Assert.Contains($"/weather/reports/{createdEntity.Id}", createdResult.Location);
+        Assert.Contains($"/weather/reports/{createdEntity.Id}", result.Location);
     }
 
     [Fact]
@@ -165,8 +160,9 @@ public class WeatherRouteMapperTests
         var result = await WeatherRouteMapper.GetFilteredReportAsync(minHumidity, mockReporter.Object, mockDb.Object);
 
         // Assert
-        var resultOk = AssertResultHasValue<Ok<IReadOnlyList<WeatherReport>>>(result);
-        AssertResultValuesMatchList(resultOk, testData);
+        Assert.NotNull(result);
+        var resultValue = AssertResultValue(result);
+        Assert.Equal(resultValue, testData);
     }
 
     [Fact]
@@ -188,36 +184,15 @@ public class WeatherRouteMapperTests
         var results = await WeatherRouteMapper.GetLocationReportsAsync(location, mockReporter.Object, mockDb.Object);
 
         // Assert
-        var okResult = AssertResultHasValue<Ok<IReadOnlyList<WeatherReport>>>(results.Result);
-        AssertResultValuesMatchList(okResult, testData);
+        var okResult = Assert.IsType<Ok<IReadOnlyList<WeatherReport>>>(results.Result);
+        var resultValue = AssertResultValue(okResult);
+        Assert.Equal(resultValue, testData);
     }
 
-
-
-    private static TResult AssertResultHasValue<TResult>(IResult result) where TResult : IResult, IValueHttpResult
+    private static TValue AssertResultValue<TValue>(IValueHttpResult<TValue> result)
     {
-        Assert.IsType<TResult>(result);
-        if (result is TResult valueResult)
-        {
-            Assert.NotNull(valueResult.Value);
-            return valueResult;
-        }
-
-        throw new InvalidCastException($"Assert returned that provided type was valid in {nameof(AssertResultHasValue)}, however cast to type failed."); // Should never happen due to assert
-    }
-
-    private static void AssertResultValuesMatchList<TResult, TItem>(TResult result, List<TItem> testData) 
-        where TItem : class
-        where TResult : IResult, IValueHttpResult<IReadOnlyList<TItem>>
-    {
-        // Not null checking due to intended use after asserting result contains value
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-        Assert.Equal(testData.Count, result.Value.Count);
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
-        for (int i = 0; i < testData.Count; i++)
-        {
-            Assert.Equal(testData[i], result.Value[i]);
-        }
+        Assert.NotNull(result.Value);
+        return result.Value;
     }
 
     private static Mock<IWeatherDbContext> CreateMockFromTestData(List<WeatherReport> testData)
