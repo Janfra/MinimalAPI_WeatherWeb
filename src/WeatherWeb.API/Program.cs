@@ -57,7 +57,7 @@ builder.Services.AddRateLimiter(
         options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
     }
 );
-builder.Services.AddWeatherServices();
+builder.Services.AddWeatherServices(builder.Configuration);
 
 var app = builder.Build();
 app.UseRateLimiter();

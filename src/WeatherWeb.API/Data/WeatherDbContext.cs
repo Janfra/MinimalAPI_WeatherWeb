@@ -7,21 +7,8 @@ public class WeatherDbContext : DbContext, IWeatherDbContext
 {
     public DbSet<WeatherReport> WeatherReports { get; set; }
 
-    // For simplicity storing the connection string in code, in real applications use configuration files or environment variables.
-    public string DbPath { get; }
-
-    public WeatherDbContext()
-    {
-        DbPath = GetDbPath();
-    }
-
-    public static string GetDbPath()
-    {
-        return "weatherapp.db";
-    }
-
-    protected override void OnConfiguring(DbContextOptionsBuilder options)
-        => options.UseSqlite($"Data Source={DbPath}");
+    public WeatherDbContext(DbContextOptions<WeatherDbContext> options) 
+        : base(options) { }
 
     void IWeatherDbContext.Add(object entity)
     {
