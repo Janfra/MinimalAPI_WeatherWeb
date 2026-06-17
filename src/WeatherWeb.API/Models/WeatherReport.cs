@@ -6,6 +6,7 @@ using System.Text.Json.Serialization;
 public class WeatherReport
 {
     [Key]
+    [JsonPropertyName("id")]
     public int Id { get; init; }
 
     [JsonPropertyName("temp_c")]
@@ -40,5 +41,5 @@ public class WeatherReport
         return $"Location: {Location} - Temperature: {TemperatureC}°C, Humidity: {Humidity}%";
     }
 
-    public WeatherReportDTO ToDataTransferObject() => new WeatherReportDTO(TemperatureC, Humidity, Location);
+    public WeatherReportResponse ToResponse() => WeatherReportResponse.FromEntity(this);
 }
