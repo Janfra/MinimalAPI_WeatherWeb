@@ -15,7 +15,7 @@ public static class WeatherServiceConfigurator
     public static void AddWeatherServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddSingleton<IWeatherFormatter, StandardWeatherFormatter>();
-        services.AddScoped<IWeatherReporter, WeatherReporter>();
+        services.AddScoped<IWeatherReportService, WeatherReportService>();
         services.AddScoped<LocationValidator>();
         services.AddDbContext<WeatherDbContext>(
             options => options.UseSqlite(configuration.GetConnectionString(_weatherConnectionStringKey) ?? throw new InvalidOperationException($"Connection string `{_weatherConnectionStringKey}` not found."))
@@ -23,6 +23,6 @@ public static class WeatherServiceConfigurator
         services.AddScoped<IWeatherDbContext>(
             serviceProvider => serviceProvider.GetRequiredService<WeatherDbContext>()
         );
-        services.AddScoped<IValidator<WeatherReportDTO>, WeatherReportDTOValidator>();
+        services.AddScoped<IValidator<WeatherReportRequest>, WeatherReportRequestValidator>();
     }
 }

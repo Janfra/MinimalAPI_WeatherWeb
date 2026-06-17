@@ -2,7 +2,6 @@
 
 using FluentValidation;
 using Microsoft.AspNetCore.Http.HttpResults;
-using WeatherWeb.Data;
 using WeatherWeb.Extensions;
 using WeatherWeb.Models;
 using WeatherWeb.Services.Reporter;
@@ -50,8 +49,8 @@ public static class WeatherRouteMapper
 
     public static async ValueTask<object?> ValidateReportDTO(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
     {
-        var reportDTO = context.GetArgument<WeatherReportDTO>(0);
-        var reportValidator = context.GetRequiredService<IValidator<WeatherReportDTO>>();
+        var reportDTO = context.GetArgument<WeatherReportRequest>(0);
+        var reportValidator = context.GetRequiredService<IValidator<WeatherReportRequest>>();
         var validationResult = await reportValidator.ValidateAsync(reportDTO);
         if (!validationResult.IsValid)
         {
@@ -60,37 +59,36 @@ public static class WeatherRouteMapper
         return await next(context);
     }
 
-    public static async Task<Ok<IReadOnlyList<WeatherReport>>> GetHotReportsAsync(IWeatherReporter reporter, IWeatherDbContext database)
+    public static async Task<Ok<IReadOnlyList<WeatherReportResponse>>> GetHotReportsAsync(IWeatherReportService reportService)
     {
-        var hotReportsTask = reporter.GetHotReportsAsync(database.WeatherReports);
+        var hotReportsTask = reportService.GetHotReportsAsync();
         var hotReports = await hotReportsTask;
         return TypedResults.Ok(hotReports);
     }
 
-    public static async Task<Ok<IReadOnlyList<string>>> GetFormattedReportsAsync(IWeatherReporter reporter, IWeatherDbContext database)
+    public static async Task<Ok<IReadOnlyList<string>>> GetFormattedReportsAsync(IWeatherReportService reportService)
     {
-        var formattedReports = await reporter.GetFormattedReportsAsync(database.WeatherReports);
+        var formattedReports = await reportService.GetFormattedReportsAsync();
         return TypedResults.Ok(formattedReports);
     }
 
-    public static async Task<Created<WeatherReport>> PostReportDTOAsync(WeatherReportDTO reportDTO, IWeatherDbContext database)
+    public static async Task<Created<WeatherReportResponse>> PostReportDTOAsync(WeatherReportRequest reportDTO, IWeatherReportService reportService)
     {
-        var entityAdded = database.Add(reportDTO.ToEntity());
-        await database.SaveChangesAsync();
-        return TypedResults.Created($"/weather/reports/{entityAdded.Id}", entityAdded);
+        var response = await reportService.AddWeatherReportAsync(reportDTO);
+        return TypedResults.Created($"/weather/reports/{response.Id}", response);
     }
 
-    public static async Task<Ok<IReadOnlyList<WeatherReport>>> GetFilteredReportAsync(float? minHumidity, IWeatherReporter reporter, IWeatherDbContext database)
+    public static async Task<Ok<IReadOnlyList<WeatherReportResponse>>> GetFilteredReportAsync(float? minHumidity, IWeatherReportService reportService)
     {
         // minHumidity comes from the URL: /weather/filter?minHumidity=Value
         var threshold = minHumidity ?? 0.0f;
-        var filtered = await reporter.GetMinHumidityReportsAsync(database.WeatherReports, threshold);
+        var filtered = await reportService.GetMinHumidityReportsAsync(threshold);
         return TypedResults.Ok(filtered);
     }
 
-    public static async Task<Results<Ok<IReadOnlyList<WeatherReport>>, BadRequest<string>, NotFound<string>>> GetLocationReportsAsync(string location, IWeatherReporter reporter, IWeatherDbContext database)
+    public static async Task<Results<Ok<IReadOnlyList<WeatherReportResponse>>, BadRequest<string>, NotFound<string>>> GetLocationReportsAsync(string location, IWeatherReportService reportService)
     {
-        var locationReports = await reporter.GetLocationReportsAsync(database.WeatherReports, location);
+        var locationReports = await reportService.GetLocationReportsAsync(location);
         if (locationReports is null || locationReports.Count == 0)
         {
             return TypedResults.NotFound($"No weather reports found for location: {location}");
@@ -99,32 +97,23 @@ public static class WeatherRouteMapper
         return TypedResults.Ok(locationReports);
     }
 
-    public static async Task<Results<NoContent, NotFound>> PutReportDTOAsync(int id, WeatherReportDTO reportDTO, IWeatherDbContext database)
+    public static async Task<Results<NoContent, NotFound>> PutReportDTOAsync(int id, WeatherReportRequest reportDTO, IWeatherReportService reportService)
     {
-        var existing = await database.WeatherReports.FindAsync(id);
+        var existing = await reportService.PutWeatherReportAsync(id, reportDTO);
         if (existing is null)
         {
             return TypedResults.NotFound();
         }
-
-        existing.TemperatureC = reportDTO.TemperatureC;
-        existing.Humidity = reportDTO.Humidity;
-        existing.Location = reportDTO.Location;
-        await database.SaveChangesAsync();
         return TypedResults.NoContent();
     }
 
-    public static async Task<Results<NoContent, NotFound>> DeleteReportAsync(int id, IWeatherDbContext database)
+    public static async Task<Results<NoContent, NotFound>> DeleteReportAsync(int id, IWeatherReportService reportService)
     {
-        var existing = await database.WeatherReports.FindAsync(id);
+        var existing = await reportService.DeleteWeatherReportAsync(id);
         if (existing is null)
         {
             return TypedResults.NotFound();
         }
-
-        database.Remove(existing);
-        await database.SaveChangesAsync();
-
         return TypedResults.NoContent();
     }
 }
