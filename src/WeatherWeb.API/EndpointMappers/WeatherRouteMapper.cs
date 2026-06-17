@@ -61,8 +61,7 @@ public static class WeatherRouteMapper
 
     public static async Task<Ok<IReadOnlyList<WeatherReportResponse>>> GetHotReportsAsync(IWeatherReportService reportService)
     {
-        var hotReportsTask = reportService.GetHotReportsAsync();
-        var hotReports = await hotReportsTask;
+        var hotReports = await reportService.GetHotReportsAsync();
         return TypedResults.Ok(hotReports);
     }
 
