@@ -7,5 +7,5 @@ public record WeatherReportRequest(
     [property: JsonPropertyName("humidity_percent")] float Humidity,
     [property: JsonPropertyName("location")] string Location)
 {
-    public WeatherReportRequest ToEntity() => new WeatherReportRequest(TemperatureC, Humidity, Location);
+    public WeatherReport ToEntity() => new WeatherReport(TemperatureC, Humidity, Location);
 }
