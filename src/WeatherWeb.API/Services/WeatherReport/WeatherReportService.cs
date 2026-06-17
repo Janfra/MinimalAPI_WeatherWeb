@@ -12,9 +12,16 @@ public class WeatherReportService(IWeatherFormatter formatter, IWeatherDbContext
     private readonly IWeatherFormatter _formatter = formatter;
     private readonly IWeatherDbContext _weatherDb = weatherDb;
 
-    public async Task<WeatherReportResponse?> PutWeatherReportAsync(int id, WeatherReportRequest weatherReportRequest)
+    public async Task<WeatherReportResponse> AddWeatherReportAsync(WeatherReportRequest weatherReportRequest, CancellationToken cancellationToken = default)
     {
-        var report = await _weatherDb.WeatherReports.FindAsync(id);
+        var entityAdded = _weatherDb.Add(weatherReportRequest.ToEntity());
+        await _weatherDb.SaveChangesAsync(cancellationToken);
+        return entityAdded.ToResponse();
+    }
+
+    public async Task<WeatherReportResponse?> PutWeatherReportAsync(int id, WeatherReportRequest weatherReportRequest, CancellationToken cancellationToken = default)
+    {
+        var report = await _weatherDb.WeatherReports.FindAsync(id, cancellationToken);
         if (report == null)
         {
             return null;
@@ -23,20 +30,20 @@ public class WeatherReportService(IWeatherFormatter formatter, IWeatherDbContext
         report.TemperatureC = weatherReportRequest.TemperatureC;
         report.Humidity = weatherReportRequest.Humidity;
         report.Location = weatherReportRequest.Location;
-        await _weatherDb.SaveChangesAsync();
+        await _weatherDb.SaveChangesAsync(cancellationToken);
         return report.ToResponse();
     }
 
     public async Task<WeatherReportResponse?> DeleteWeatherReportAsync(int id, CancellationToken cancellationToken = default)
     {
-        var report = await _weatherDb.WeatherReports.FindAsync(id);
+        var report = await _weatherDb.WeatherReports.FindAsync(id, cancellationToken);
         if (report == null)
         {
             return null;
         }
 
         _weatherDb.Remove(report);
-        await _weatherDb.SaveChangesAsync();
+        await _weatherDb.SaveChangesAsync(cancellationToken);
         return report.ToResponse(); 
     }
 
