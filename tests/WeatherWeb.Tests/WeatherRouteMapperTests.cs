@@ -18,20 +18,19 @@ public class WeatherRouteMapperTests
     {
         // Arrange
         var hotThreshold = 0;
-        var testData = new List<WeatherReport>
+        var testData = new List<WeatherReportResponse>
         {
-            new(temperatureC: 60, humidity: 50.0f, location: "CityA") { Id = 1 },
-            new(temperatureC: -100, humidity: 50.0f, location: "CityB") { Id = 2 },
-            new(temperatureC: 0, humidity: 50.0f, location: "CityC") { Id = 3 },
-            new(temperatureC: 1, humidity: 50.0f, location: "CityC") { Id = 4 },
+            new(1, TemperatureC: 60, Humidity: 50.0f, Location: "CityA"),
+            new(2, TemperatureC: -100, Humidity: 50.0f, Location: "CityB"),
+            new(3, TemperatureC: hotThreshold, Humidity: 50.0f, Location: "CityC"),
+            new(4, TemperatureC: hotThreshold + 1, Humidity: 50.0f, Location: "CityC"),
         };
-        var mockDb = CreateMockFromTestData(testData);
-        var mockReporter = new Mock<IWeatherReporter>();
-        mockReporter.Setup(r => r.GetHotReportsAsync(It.IsAny<IQueryable<WeatherReport>>(), It.IsAny<CancellationToken>()))
+        var mockReportService = new Mock<IWeatherReportService>();
+        mockReportService.Setup(r => r.GetHotReportsAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(testData.Where(r => r.TemperatureC > hotThreshold).ToList());
 
         // Act
-        var result = await WeatherRouteMapper.GetHotReportsAsync(mockReporter.Object, mockDb.Object);
+        var result = await WeatherRouteMapper.GetHotReportsAsync(mockReportService.Object);
 
         // Assert
         Assert.NotNull(result);
@@ -45,19 +44,17 @@ public class WeatherRouteMapperTests
     {
         // Arrange
         string MockFormat(WeatherReport r) => $"Location: {r.Location}, TempC: {r.TemperatureC}, Humidity: {r.Humidity}";
-
         var testData = new List<WeatherReport>
         {
             new(temperatureC: 60, humidity: 50.0f, location: "CityA") { Id = 1 },
             new(temperatureC: -100, humidity: 30.0f, location: "CityB") { Id = 2 },
         };
-        var mockDb = CreateMockFromTestData(testData);
-        var mockReporter = new Mock<IWeatherReporter>();
-        mockReporter.Setup(r => r.GetFormattedReportsAsync(It.IsAny<IQueryable<WeatherReport>>(), It.IsAny<CancellationToken>()))
+        var mockReportService = new Mock<IWeatherReportService>();
+        mockReportService.Setup(r => r.GetFormattedReportsAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(testData.Select(MockFormat).ToList());
 
         // Act
-        var result = await WeatherRouteMapper.GetFormattedReportsAsync(mockReporter.Object, mockDb.Object);
+        var result = await WeatherRouteMapper.GetFormattedReportsAsync(mockReportService.Object);
 
         // Assert
         Assert.NotNull(result);
@@ -74,13 +71,12 @@ public class WeatherRouteMapperTests
     {
         // Arrange
         var testData = new List<WeatherReport>();
-        var mockDb = CreateMockFromTestData(testData);
-        var mockReporter = new Mock<IWeatherReporter>();
-        mockReporter.Setup(r => r.GetFormattedReportsAsync(It.IsAny<IQueryable<WeatherReport>>(), It.IsAny<CancellationToken>()))
+        var mockReportService = new Mock<IWeatherReportService>();
+        mockReportService.Setup(r => r.GetFormattedReportsAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(testData.Select(r => r.ToString()).ToList());
 
         // Act
-        var result = await WeatherRouteMapper.GetFormattedReportsAsync(mockReporter.Object, mockDb.Object);
+        var result = await WeatherRouteMapper.GetFormattedReportsAsync(mockReportService.Object);
 
         // Assert
         Assert.NotNull(result);
@@ -92,14 +88,14 @@ public class WeatherRouteMapperTests
     public async Task PostReportDTOAsync_ShouldReturnValidationProblem()
     {
         // Arrange
-        var invalidReportDTO = new WeatherReportDTO(
+        var invalidReportDTO = new WeatherReportRequest(
             TemperatureC: -300, // Invalid temperature
             Humidity: 50.0f,
             Location: "CityA"
         );
         var errorKey = "TemperatureC";
         var errorMessage = "TemperatureC must be between -100 and 60.";
-        var mockValidator = new Mock<IValidator<WeatherReportDTO>>();
+        var mockValidator = new Mock<IValidator<WeatherReportRequest>>();
         mockValidator.Setup(v => v.ValidateAsync(invalidReportDTO, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new FluentValidation.Results.ValidationResult(
             [
@@ -122,24 +118,23 @@ public class WeatherRouteMapperTests
     public async Task PostReportDTOAsync_ShouldReturnAddedReport()
     {
         // Arrange
-        var testData = new WeatherReportDTO(
+        var testData = new WeatherReportRequest(
             TemperatureC: 30,
             Humidity: 50.0f,
             Location: "CityA"
             );
-        WeatherReport testResultData = new(testData.TemperatureC, testData.Humidity, testData.Location) { Id = 1 };
-        var mockDb = CreateMockFromTestData(new());
-        mockDb.Setup(db => db.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1);
-        mockDb.Setup(db => db.Add<WeatherReport>(It.IsAny<WeatherReport>())).Returns(testResultData);
+        WeatherReportResponse testResultData = new(1, testData.TemperatureC, testData.Humidity, testData.Location);
+        var mockReportService = new Mock<IWeatherReportService>();
+        mockReportService.Setup(m => m.AddWeatherReportAsync(testData, It.IsAny<CancellationToken>())).ReturnsAsync(testResultData);
 
         // Act
-        var result = await WeatherRouteMapper.PostReportDTOAsync(testData, mockDb.Object);
+        var result = await WeatherRouteMapper.PostReportDTOAsync(testData, mockReportService.Object);
 
         // Assert
         Assert.NotNull(result);
-        var createdEntity = AssertResultValue(result);
-        Assert.Equal(createdEntity, testResultData);
-        Assert.Contains($"/weather/reports/{createdEntity.Id}", result.Location);
+        var response = AssertResultValue(result);
+        Assert.Equal(response, testResultData);
+        Assert.Contains($"/weather/reports/{response.Id}", result.Location);
     }
 
     [Fact]
@@ -147,17 +142,16 @@ public class WeatherRouteMapperTests
     {
         // Arrange
         var minHumidity = 30.0f;
-        var testData = new List<WeatherReport>
+        var testData = new List<WeatherReportResponse>
         {
-            new(temperatureC: 10, humidity: minHumidity, location: "CityA") { Id = 1 },
-            new(temperatureC: 20, humidity: minHumidity + 0.1f, location: "CityB") { Id = 2 },
+            new(1, TemperatureC: 10, Humidity: minHumidity, Location: "CityA"),
+            new(2, TemperatureC: 20, Humidity: minHumidity + 0.1f, Location: "CityB"),
         };
-        var mockDb = CreateMockFromTestData(testData);
-        var mockReporter = new Mock<IWeatherReporter>();
-        mockReporter.Setup(r => r.GetMinHumidityReportsAsync(It.IsAny<IQueryable<WeatherReport>>(), minHumidity, It.IsAny<CancellationToken>())).ReturnsAsync(testData);
+        var mockReportService = new Mock<IWeatherReportService>();
+        mockReportService.Setup(r => r.GetMinHumidityReportsAsync(minHumidity, It.IsAny<CancellationToken>())).ReturnsAsync(testData);
 
         // Act
-        var result = await WeatherRouteMapper.GetFilteredReportAsync(minHumidity, mockReporter.Object, mockDb.Object);
+        var result = await WeatherRouteMapper.GetFilteredReportAsync(minHumidity, mockReportService.Object);
 
         // Assert
         Assert.NotNull(result);
@@ -169,22 +163,21 @@ public class WeatherRouteMapperTests
     public async Task GetLocationReportsAsync_ShouldReturnOkResultWithLocations()
     {
         // Arrange
-        var location = "CityA";
-        var testData = new List<WeatherReport>
+        var Location = "CityA";
+        var testData = new List<WeatherReportResponse>
         {
-            new(temperatureC: 10, humidity: 10.0f, location: location) { Id = 1 },
-            new(temperatureC: 20, humidity: 30.0f, location: location) { Id = 2 },
+            new(1, TemperatureC: 10, Humidity: 10.0f, Location: Location),
+            new(2, TemperatureC: 20, Humidity: 30.0f, Location: Location),
         };
 
-        var mockDb = CreateMockFromTestData(testData);
-        var mockReporter = new Mock<IWeatherReporter>();
-        mockReporter.Setup(r => r.GetLocationReportsAsync(It.IsAny<IQueryable<WeatherReport>>(), location, It.IsAny<CancellationToken>())).ReturnsAsync(testData);
+        var mockReportService = new Mock<IWeatherReportService>();
+        mockReportService.Setup(r => r.GetLocationReportsAsync(Location, It.IsAny<CancellationToken>())).ReturnsAsync(testData);
 
         // Act
-        var results = await WeatherRouteMapper.GetLocationReportsAsync(location, mockReporter.Object, mockDb.Object);
+        var results = await WeatherRouteMapper.GetLocationReportsAsync(Location, mockReportService.Object);
 
         // Assert
-        var okResult = Assert.IsType<Ok<IReadOnlyList<WeatherReport>>>(results.Result);
+        var okResult = Assert.IsType<Ok<IReadOnlyList<WeatherReportResponse>>>(results.Result);
         var resultValue = AssertResultValue(okResult);
         Assert.Equal(resultValue, testData);
     }
@@ -193,13 +186,5 @@ public class WeatherRouteMapperTests
     {
         Assert.NotNull(result.Value);
         return result.Value;
-    }
-
-    private static Mock<IWeatherDbContext> CreateMockFromTestData(List<WeatherReport> testData)
-    {
-        var mockSet = testData.BuildMockDbSet();
-        var mockDb = new Mock<IWeatherDbContext>();
-        mockDb.Setup(db => db.WeatherReports).Returns(mockSet.Object);
-        return mockDb;
     }
 }
