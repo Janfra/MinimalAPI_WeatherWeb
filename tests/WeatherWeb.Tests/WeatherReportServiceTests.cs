@@ -3,9 +3,9 @@
 using Moq;
 using MockQueryable.Moq;
 using WeatherWeb.Models;
-using WeatherWeb.Services.Formatter;
-using WeatherWeb.Services.Reporter;
 using WeatherWeb.Data;
+using WeatherWeb.Services.WeatherReport;
+using WeatherWeb.Services.WeatherFormatter;
 
 public class WeatherReportServiceTests
 {

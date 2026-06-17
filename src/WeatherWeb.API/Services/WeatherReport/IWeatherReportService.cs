@@ -1,4 +1,4 @@
-﻿namespace WeatherWeb.Services.Reporter;
+﻿namespace WeatherWeb.Services.WeatherReport;
 
 using WeatherWeb.Models;
 

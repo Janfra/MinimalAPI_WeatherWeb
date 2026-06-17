@@ -4,7 +4,7 @@ using FluentValidation;
 using Microsoft.AspNetCore.Http.HttpResults;
 using WeatherWeb.Extensions;
 using WeatherWeb.Models;
-using WeatherWeb.Services.Reporter;
+using WeatherWeb.Services.WeatherReport;
 using WeatherWeb.Validators;
 
 /// <remarks>

@@ -4,8 +4,8 @@ using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using WeatherWeb.Data;
 using WeatherWeb.Models;
-using WeatherWeb.Services.Formatter;
-using WeatherWeb.Services.Reporter;
+using WeatherWeb.Services.WeatherFormatter;
+using WeatherWeb.Services.WeatherReport;
 using WeatherWeb.Validators;
 
 public static class WeatherServiceConfigurator

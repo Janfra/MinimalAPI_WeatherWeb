@@ -1,10 +1,10 @@
-﻿namespace WeatherWeb.Services.Reporter;
+﻿namespace WeatherWeb.Services.WeatherReport;
 
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 using WeatherWeb.Data;
 using WeatherWeb.Models;
-using WeatherWeb.Services.Formatter;
+using WeatherWeb.Services.WeatherFormatter;
 
 public class WeatherReportService(IWeatherFormatter formatter, IWeatherDbContext weatherDb) : IWeatherReportService
 {

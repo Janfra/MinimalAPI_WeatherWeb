@@ -1,4 +1,4 @@
-﻿namespace WeatherWeb.Services.Formatter;
+﻿namespace WeatherWeb.Services.WeatherFormatter;
 
 using WeatherWeb.Models;
    

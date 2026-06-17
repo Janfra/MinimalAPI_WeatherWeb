@@ -1,6 +1,6 @@
-﻿namespace WeatherWeb.Services.Formatter;
+﻿namespace WeatherWeb.Services.WeatherFormatter;
 
-using WeatherWeb.Models; 
+using WeatherWeb.Models;
 
 public class StandardWeatherFormatter : IWeatherFormatter
 {

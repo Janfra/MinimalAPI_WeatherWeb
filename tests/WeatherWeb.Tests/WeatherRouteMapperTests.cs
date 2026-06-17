@@ -8,7 +8,7 @@ using Moq;
 using WeatherWeb.Data;
 using WeatherWeb.EndpointMappers;
 using WeatherWeb.Models;
-using WeatherWeb.Services.Reporter;
+using WeatherWeb.Services.WeatherReport;
 using WeatherWeb.Tests.Extensions;
 
 public class WeatherRouteMapperTests
